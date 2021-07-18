@@ -28,6 +28,7 @@ export default {
   },
   async created() {
     this.products = (await this.$axios.get('products')).data.products
+    await this.$axios.get('users')
   },
 }
 </script>
