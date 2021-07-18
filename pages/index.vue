@@ -14,14 +14,16 @@
 
 <script>
 import ProductCard from '@/components/ProductCard'
-import products from '@/mocks/products.json'
 
 export default {
   components: { ProductCard },
-  computed: {
-    products() {
-      return products
-    },
+  data() {
+    return {
+      products: [],
+    }
+  },
+  async created() {
+    this.products = (await this.$axios.get('products')).data.products
   },
 }
 </script>
