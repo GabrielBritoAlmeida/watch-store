@@ -21,6 +21,23 @@ describe('Index - integration', () => {
     server.shutdown()
   })
 
+  const getProductList = (quantity = 10, overrides = []) => {
+    let overridesList = []
+
+    if (overrides.length > 0) {
+      overridesList = overrides.map((override) =>
+        server.create('product', override)
+      )
+    }
+
+    const products = [
+      ...server.createList('product', quantity),
+      ...overridesList,
+    ]
+
+    return products
+  }
+
   it('should mount the component', () => {
     const wrapper = mount(ProductList)
     expect(wrapper.vm).toBeDefined()
@@ -76,15 +93,14 @@ describe('Index - integration', () => {
 
   it('should filter the product list when a search is performed', async () => {
     // AAA
-    const products = [
-      ...server.createList('product', 10),
-      server.create('product', {
+    const products = await getProductList(10, [
+      {
         title: 'Meu relógio',
-      }),
-      server.create('product', {
+      },
+      {
         title: 'Meu outro relógio',
-      }),
-    ]
+      },
+    ])
 
     axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
 
@@ -110,12 +126,11 @@ describe('Index - integration', () => {
 
   it('should filter the product list when a search is cleared', async () => {
     // AAA
-    const products = [
-      ...server.createList('product', 10),
-      server.create('product', {
+    const products = await getProductList(10, [
+      {
         title: 'Meu relógio',
-      }),
-    ]
+      },
+    ])
 
     axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
 
