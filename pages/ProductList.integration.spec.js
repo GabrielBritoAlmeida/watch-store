@@ -59,4 +59,83 @@ describe('Index - integration', () => {
 
     expect(cards).toHaveLength(10)
   })
+
+  it('should  display the error message when Promise rejects', async () => {
+    axios.get.mockReturnValue(Promise.reject(new Error('')))
+
+    const wrapper = mount(ProductList, {
+      mocks: {
+        $axios: axios,
+      },
+    })
+
+    await Vue.nextTick()
+
+    expect(wrapper.text()).toContain('Problemas ao carregar lista produtos.')
+  })
+
+  it('should filter the product list when a search is performed', async () => {
+    // AAA
+    const products = [
+      ...server.createList('product', 10),
+      server.create('product', {
+        title: 'Meu relógio',
+      }),
+      server.create('product', {
+        title: 'Meu outro relógio',
+      }),
+    ]
+
+    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
+
+    const wrapper = mount(ProductList, {
+      mocks: {
+        $axios: axios,
+      },
+    })
+
+    await Vue.nextTick()
+
+    // ACT
+    const search = wrapper.findComponent(Search)
+    search.find('input[type="search"]').setValue('relógio')
+    await search.find('form').trigger('submit')
+
+    // ASSERT
+    const cards = wrapper.findAllComponents(ProductCard)
+    expect(wrapper.vm.searchTerm).toEqual('relógio')
+    expect(cards).toHaveLength(2)
+  })
+
+  fit('should filter the product list when a search is cleared', async () => {
+    // AAA
+    const products = [
+      ...server.createList('product', 10),
+      server.create('product', {
+        title: 'Meu relógio',
+      }),
+    ]
+
+    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
+
+    const wrapper = mount(ProductList, {
+      mocks: {
+        $axios: axios,
+      },
+    })
+
+    await Vue.nextTick()
+
+    // ACT
+    const search = wrapper.findComponent(Search)
+    search.find('input[type="search"]').setValue('relógio')
+    await search.find('form').trigger('submit')
+    search.find('input[type="search"]').setValue('')
+    await search.find('form').trigger('submit')
+
+    // ASSERT
+    const cards = wrapper.findAllComponents(ProductCard)
+    expect(wrapper.vm.searchTerm).toEqual('')
+    expect(cards).toHaveLength(11)
+  })
 })
