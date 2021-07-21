@@ -104,10 +104,11 @@ describe('Index - integration', () => {
     // ASSERT
     const cards = wrapper.findAllComponents(ProductCard)
     expect(wrapper.vm.searchTerm).toEqual('relógio')
+    expect(wrapper.text()).toContain('relógio')
     expect(cards).toHaveLength(2)
   })
 
-  fit('should filter the product list when a search is cleared', async () => {
+  it('should filter the product list when a search is cleared', async () => {
     // AAA
     const products = [
       ...server.createList('product', 10),
