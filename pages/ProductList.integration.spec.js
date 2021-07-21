@@ -38,10 +38,18 @@ describe('Index - integration', () => {
     return products
   }
 
-  const mountProductList = async (quantity = 10, overrides = []) => {
+  const mountProductList = async (
+    quantity = 10,
+    overrides = [],
+    shouldReject = false
+  ) => {
     const products = getProductList(quantity, overrides)
 
-    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
+    if (shouldReject) {
+      axios.get.mockReturnValue(Promise.reject(new Error('')))
+    } else {
+      axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
+    }
 
     const wrapper = mount(ProductList, {
       mocks: {
@@ -84,15 +92,7 @@ describe('Index - integration', () => {
   })
 
   it('should  display the error message when Promise rejects', async () => {
-    axios.get.mockReturnValue(Promise.reject(new Error('')))
-
-    const wrapper = mount(ProductList, {
-      mocks: {
-        $axios: axios,
-      },
-    })
-
-    await Vue.nextTick()
+    const { wrapper } = await mountProductList(10, [], true)
 
     expect(wrapper.text()).toContain('Problemas ao carregar lista produtos.')
   })
