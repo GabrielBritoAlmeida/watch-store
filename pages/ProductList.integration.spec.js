@@ -38,6 +38,22 @@ describe('Index - integration', () => {
     return products
   }
 
+  const mountProductList = async (quantity = 10, overrides = []) => {
+    const products = getProductList(quantity, overrides)
+
+    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
+
+    const wrapper = mount(ProductList, {
+      mocks: {
+        $axios: axios,
+      },
+    })
+
+    await Vue.nextTick()
+
+    return { wrapper, products }
+  }
+
   it('should mount the component', () => {
     const wrapper = mount(ProductList)
     expect(wrapper.vm).toBeDefined()
@@ -60,17 +76,7 @@ describe('Index - integration', () => {
   })
 
   it('should mount the ProductCard component 10 times', async () => {
-    const products = server.createList('product', 10)
-
-    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
-
-    const wrapper = mount(ProductList, {
-      mocks: {
-        $axios: axios,
-      },
-    })
-
-    await Vue.nextTick()
+    const { wrapper } = await mountProductList()
 
     const cards = wrapper.findAllComponents(ProductCard)
 
@@ -93,7 +99,7 @@ describe('Index - integration', () => {
 
   it('should filter the product list when a search is performed', async () => {
     // AAA
-    const products = await getProductList(10, [
+    const { wrapper } = await mountProductList(10, [
       {
         title: 'Meu relógio',
       },
@@ -101,16 +107,6 @@ describe('Index - integration', () => {
         title: 'Meu outro relógio',
       },
     ])
-
-    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
-
-    const wrapper = mount(ProductList, {
-      mocks: {
-        $axios: axios,
-      },
-    })
-
-    await Vue.nextTick()
 
     // ACT
     const search = wrapper.findComponent(Search)
@@ -126,21 +122,13 @@ describe('Index - integration', () => {
 
   it('should filter the product list when a search is cleared', async () => {
     // AAA
-    const products = await getProductList(10, [
+    const { wrapper, products } = await mountProductList(10, [
       {
         title: 'Meu relógio',
       },
     ])
 
     axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
-
-    const wrapper = mount(ProductList, {
-      mocks: {
-        $axios: axios,
-      },
-    })
-
-    await Vue.nextTick()
 
     // ACT
     const search = wrapper.findComponent(Search)
