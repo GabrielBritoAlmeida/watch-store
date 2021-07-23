@@ -19,6 +19,7 @@ describe('Index - integration', () => {
 
   afterEach(() => {
     server.shutdown()
+    jest.clearAllMocks()
   })
 
   const getProductList = (quantity = 10, overrides = []) => {
@@ -122,13 +123,11 @@ describe('Index - integration', () => {
 
   it('should filter the product list when a search is cleared', async () => {
     // AAA
-    const { wrapper, products } = await mountProductList(10, [
+    const { wrapper } = await mountProductList(10, [
       {
         title: 'Meu relógio',
       },
     ])
-
-    axios.get.mockReturnValue(Promise.resolve({ data: { products } }))
 
     // ACT
     const search = wrapper.findComponent(Search)
